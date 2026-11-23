@@ -1,0 +1,6 @@
+PORT=4000
+DATABASE_URL=postgresql://postgres:password@localhost:5432/afribook
+JWT_ACCESS_SECRET=remplacer_par_un_secret_fort_access_256bits
+JWT_REFRESH_SECRET=remplacer_par_un_secret_fort_refresh_256bits
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_DAYS=30
