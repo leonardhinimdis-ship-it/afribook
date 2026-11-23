@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFRIBOOK - L'Afrique connectée au monde.</title>
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+  <!-- PWA & Mobile Web App Config -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0047b3">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AfriBook">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Styles personnalisés AfriBook -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#f0f2f5] text-[#1c1e21] antialiased min-h-screen flex flex-col pb-16 md:pb-0">
+
+  <!-- ========================================================================= -->
+  <!-- 1. EN-TÊTE PRINCIPAL (BANDEAU BLEU ROYAL OFFICIEL AFRIBOOK) -->
+  <!-- ========================================================================= -->
+  <header class="afri-header sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
+      
+      <!-- LOGO OFFICIEL & NOM DE MARQUE -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchMainTab('feed')">
+        <img 
+          src="images/logo.jpg" 
+          alt="Logo AfriBook" 
+          class="w-10 h-10 rounded-xl shadow-md border-2 border-white/30 object-cover hover:scale-105 transition-transform"
+        >
+        <div>
+          <div class="afri-brand-title text-xl sm:text-2xl leading-none flex items-center">
+            <span class="afri-text-afri">AFRI</span><span class="afri-text-book">BOOK</span>
+          </div>
+          <div class="afri-slogan">L'Afrique connectée au monde.</div>
+        </div>
+      </div>
+
+      <!-- Barre de recherche (sur écrans moyens et grands) -->
+      <div class="hidden md:flex flex-1 max-w-sm mx-4 relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-200 text-xs"></i>
+        <input 
+          id="searchInputDesktop"
+          type="text" 
+          placeholder="Rechercher sur AfriBook..." 
+          class="w-full pl-9 pr-4 py-2 bg-white/20 hover:bg-white/25 focus:bg-white text-white focus:text-slate-800 placeholder-blue-100 text-xs rounded-full border border-white/20 focus:outline-none transition-all"
+          onkeyup="handleSearch(event)"
+        >
+      </div>
+
+      <!-- BOUTONS D'ACTION (RECHERCHE, NOTIFICATIONS, MESSENGER) -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        
+        <!-- Bascule Mode Maquette Smartphone vs Dashboard Web -->
+        <button 
+          id="mockupModeToggleBtn"
+          onclick="toggleMockupFrameMode()"
+          title="Afficher dans le châssis smartphone officiel de la maquette"
+          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/20 hover:bg-white/30 text-white border border-white/20 transition-all"
+        >
+          <i class="fa-solid fa-mobile-screen"></i>
+          <span id="mockupModeLabel">Mode Smartphone</span>
+        </button>
+
+        <!-- Bouton Économie de Données (Low-Data) -->
+        <button 
+          id="lowDataToggleBtn"
+          onclick="toggleLowDataMode()"
+          title="Mode Économie de données (-70% Mo)"
+          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/20 hover:bg-white/30 text-white border border-white/20 transition-all"
+        >
+          <i class="fa-solid fa-bolt-lightning text-yellow-300"></i>
+          <span id="lowDataLabel">Data Éco : OFF</span>
+        </button>
+
+        <!-- Recherche mobile -->
+        <button class="md:hidden afri-header-icon-btn" onclick="toggleMobileSearch()">
+          <i class="fa-solid fa-magnifying-glass text-sm"></i>
+        </button>
+
+        <!-- Notifications (Cloche avec badge rouge "3" et menu déroulant) -->
+        <div class="relative">
+          <button class="afri-header-icon-btn" onclick="toggleNotificationsDropdown()">
+            <i class="fa-solid fa-bell text-sm"></i>
+            <span id="notifBadgeTop" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-[#0047b3]">3</span>
+          </button>
+          
+          <div id="notificationsDropdownMenu" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 animate-slide-down overflow-hidden">
+            <div class="p-3 bg-gradient-to-r from-[#0047b3] to-[#003893] text-white flex items-center justify-between">
+              <span class="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-bell"></i> Notifications
+              </span>
+              <button onclick="markAllNotificationsAsRead()" class="text-[11px] text-blue-200 hover:text-white underline">Tout marquer comme lu</button>
+            </div>
+            <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto text-xs" id="notifListItems">
+              <div onclick="switchMainTab('feed'); toggleNotificationsDropdown();" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors bg-blue-50/50">
+                <img src="images/story-marie.jpg" class="w-9 h-9 rounded-full object-cover">
+                <div class="flex-1">
+                  <p class="text-slate-800"><strong>Marie</strong> a adoré votre publication avec Yaoundé ❤️</p>
+                  <span class="text-[10px] text-blue-600 font-semibold">Il y a 10 minutes</span>
+                </div>
+              </div>
+              <div onclick="switchMainTab('messages'); toggleNotificationsDropdown();" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors bg-blue-50/50">
+                <img src="images/story-albert.jpg" class="w-9 h-9 rounded-full object-cover">
+                <div class="flex-1">
+                  <p class="text-slate-800"><strong>Albert</strong> vous a envoyé un nouveau message direct 💬</p>
+                  <span class="text-[10px] text-blue-600 font-semibold">Il y a 45 minutes</span>
+                </div>
+              </div>
+              <div onclick="switchMainTab('feed'); toggleNotificationsDropdown();" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors">
+                <img src="images/logo-round.jpg" class="w-9 h-9 rounded-full object-cover">
+                <div class="flex-1">
+                  <p class="text-slate-800"><strong>AFRIBOOK Officiel</strong> a partagé une nouvelle annonce communautaire 🌍</p>
+                  <span class="text-[10px] text-slate-400">Il y a 2 heures</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messagerie / Chat direct -->
+        <button class="afri-header-icon-btn" onclick="switchMainTab('messages')">
+          <i class="fa-solid fa-comment-dots text-sm"></i>
+        </button>
+
+        <!-- Avatar profil utilisateur en-tête -->
+        <div onclick="toggleMenuDrawer()" class="flex items-center gap-1 cursor-pointer pl-1">
+          <img 
+            id="headerUserAvatar" 
+            src="images/avatar-jeanpierre.jpg" 
+            alt="Jean Pierre MANGA" 
+            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-white/80 shadow hover:scale-105 transition-transform"
+          >
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. BARRE D'ONGLETS / NAVIGATION PRINCIPALE (STYLE APP FACEBOOK / AFRIBOOK) -->
+    <nav class="bg-white border-b border-slate-200 flex items-center justify-around shadow-sm text-sm">
+      <button onclick="switchMainTab('feed')" id="tab-feed" class="afri-tab-item active" title="Accueil">
+        <i class="fa-solid fa-house text-lg sm:text-xl"></i>
+      </button>
+      <button onclick="switchMainTab('friends')" id="tab-friends" class="afri-tab-item relative" title="Amis">
+        <i class="fa-solid fa-user-group text-lg sm:text-xl"></i>
+        <span class="afri-badge-red">5</span>
+      </button>
+      <button onclick="switchMainTab('videos')" id="tab-videos" class="afri-tab-item" title="Vidéos">
+        <i class="fa-solid fa-circle-play text-lg sm:text-xl"></i>
+      </button>
+      <button onclick="switchMainTab('groups')" id="tab-groups" class="afri-tab-item" title="Groupes">
+        <i class="fa-solid fa-users text-lg sm:text-xl"></i>
+      </button>
+      <button onclick="switchMainTab('marketplace')" id="tab-marketplace" class="afri-tab-item" title="Marketplace">
+        <i class="fa-solid fa-store text-lg sm:text-xl"></i>
+      </button>
+      <button onclick="switchMainTab('menu')" id="tab-menu" class="afri-tab-item" title="Menu">
+        <i class="fa-solid fa-bars text-lg sm:text-xl"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- CONTENEUR PRINCIPAL GRILLE (CENTRE + COLONNES LATÉRALES) -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-2 sm:px-4 py-4 w-full flex-1 grid grid-cols-1 md:grid-cols-12 gap-5">
+
+    <!-- ======================================================================= -->
+    <!-- COLONNE GAUCHE (REPRODUCTION EXACTE DE L'ÉCRAN "MENU" DE LA MAQUETTE)   -->
+    <!-- ======================================================================= -->
+    <aside id="sideMenuColumn" class="hidden md:block md:col-span-4 lg:col-span-3 space-y-3">
+      
+      <!-- Carte Profil Utilisateur (Jean Pierre MANGA) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Bandeau profil bleu de la maquette -->
+        <div class="bg-gradient-to-r from-[#0047b3] to-[#003380] p-4 text-white">
+          <div class="flex items-center gap-3">
+            <img 
+              src="images/avatar-jeanpierre.jpg" 
+              alt="Jean Pierre MANGA" 
+              class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md"
+            >
+            <div class="overflow-hidden">
+              <h3 class="font-bold text-sm sm:text-base leading-tight truncate">Jean Pierre MANGA</h3>
+              <p class="text-xs text-blue-200 truncate mb-1">@jeanpierremanga</p>
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#00d021] text-white text-[10px] font-bold shadow-sm">
+                <i class="fa-solid fa-circle-check text-[10px]"></i> Compte vérifié
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTE DES OPTIONS DU MENU (EXACTEMENT SELON LA MAQUETTE) -->
+        <div class="p-2 space-y-0.5">
+          
+          <div onclick="switchMainTab('profile')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-blue-100 text-blue-700">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <span>Mon profil</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="switchMainTab('friends')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-blue-100 text-blue-700">
+                <i class="fa-solid fa-user-group"></i>
+              </div>
+              <span>Amis</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="bg-red-600 text-white font-bold text-xs px-2 py-0.5 rounded-full">128</span>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+          </div>
+
+          <div onclick="switchMainTab('groups')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-emerald-100 text-emerald-700">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <span>Groupes</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="showToast('Section Pages')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-orange-100 text-orange-600">
+                <i class="fa-solid fa-flag"></i>
+              </div>
+              <span>Pages</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="switchMainTab('marketplace')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-blue-100 text-blue-700">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <span>Marketplace</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="showToast('Section Événements')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-red-100 text-red-600">
+                <i class="fa-solid fa-calendar-days"></i>
+              </div>
+              <span>Événements</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="switchMainTab('videos')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-purple-100 text-purple-700">
+                <i class="fa-solid fa-play"></i>
+              </div>
+              <span>Vidéos</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="showToast('Section Souvenirs')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-sky-100 text-sky-700">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+              <span>Souvenirs</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div onclick="showToast('Section Enregistrés')" class="menu-item-row">
+            <div class="flex items-center gap-3">
+              <div class="menu-icon-box bg-purple-100 text-purple-700">
+                <i class="fa-solid fa-bookmark"></i>
+              </div>
+              <span>Enregistrés</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 space-y-1">
+            
+            <div class="menu-item-row" onclick="showToast('Paramètres')">
+              <div class="flex items-center gap-3 text-slate-700">
+                <i class="fa-solid fa-gear text-slate-500 w-5"></i>
+                <span class="text-xs">Paramètres et confidentialité</span>
+              </div>
+              <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+            </div>
+
+            <div class="menu-item-row" onclick="showToast('Centre d\'aide')">
+              <div class="flex items-center gap-3 text-slate-700">
+                <i class="fa-solid fa-circle-question text-slate-500 w-5"></i>
+                <span class="text-xs">Aide et assistance</span>
+              </div>
+              <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+            </div>
+
+            <!-- MODE SOMBRE (AVEC VRAI BOUTON BASCULE QUI FONCTIONNE) -->
+            <div class="menu-item-row">
+              <div class="flex items-center gap-3 text-slate-700">
+                <i class="fa-solid fa-moon text-slate-500 w-5"></i>
+                <span class="text-xs font-semibold">Mode sombre</span>
+              </div>
+              <label class="switch-toggle">
+                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+                <span class="slider-toggle"></span>
+              </label>
+            </div>
+
+            <div class="menu-item-row text-red-600 hover:bg-red-50" onclick="handleLogout()">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+                <span class="text-xs font-bold">Déconnexion</span>
+              </div>
+            </div>
+
+          </div>
+http://localhost:4000http://localhost:4000http://localhost:4000
+
+
+
+
+
+
+
+        </div>
+
+        <!-- BANNIÈRE PROMOTIONNELLE OFFICIELLE DU BAS -->
+        <div class="p-3 bg-gradient-to-r from-[#003893] to-[#0047b3] text-white flex items-center justify-between gap-2 cursor-pointer hover:opacity-95 transition-opacity" onclick="showToast('Rejoignez l\'initiative !')">
+          <div class="flex items-center gap-2">
+            <img src="images/logo.jpg" class="w-8 h-8 rounded-lg object-cover">
+            <div>
+              <div class="font-black text-xs tracking-tight text-white flex items-center">
+                AFRI<span class="text-[#00e626]">BOOK</span>
+              </div>
+              <div class="text-[10px] text-blue-200">Construisons ensemble une Afrique numérique !</div>
+            </div>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-[#00d021] text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ======================================================================= -->
+    <!-- COLONNE CENTRALE : FIL D'ACTUALITÉ & STORIES (ÉCRAN GAUCHE DU MOCKUP)   -->
+    <!-- ======================================================================= -->
+    <section class="col-span-1 md:col-span-8 lg:col-span-6 space-y-4">
+      
+      <!-- CONTENU ONGLET 1 : FIL D'ACTUALITÉ (ACCUEIL) -->
+      <div id="viewFeedSection" class="space-y-4">
+        
+        <!-- 1. CARROUSEL DES STORIES (REPRODUCTION EXACTE DE LA MAQUETTE) -->
+        <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200">
+          <div class="stories-scroll">
+            
+            <!-- Story 1 : Créer une story (Jean Pierre MANGA) -->
+            <div class="story-circle-item" onclick="openCreateStoryModal()">
+              <div class="story-avatar-wrapper !p-0 border-2 border-dashed border-blue-500 bg-none">
+                <img src="images/avatar-jeanpierre.jpg" class="story-avatar-img">
+                <div class="story-add-badge">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                </div>
+              </div>
+              <span class="story-name text-[11px] font-bold text-blue-800">Créer une story</span>
+            </div>
+
+            <!-- Story 2 : Marie -->
+            <div class="story-circle-item" onclick="viewStory('Marie', 'images/story-marie.jpg')">
+              <div class="story-avatar-wrapper">
+                <img src="images/story-marie.jpg" class="story-avatar-img" alt="Marie">
+                <div class="story-add-badge !bg-emerald-600">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                </div>
+              </div>
+              <span class="story-name">Marie</span>
+            </div>
+
+            <!-- Story 3 : Albert -->
+            <div class="story-circle-item" onclick="viewStory('Albert', 'images/story-albert.jpg')">
+              <div class="story-avatar-wrapper">
+                <img src="images/story-albert.jpg" class="story-avatar-img" alt="Albert">
+              </div>
+              <span class="story-name">Albert</span>
+            </div>
+
+            <!-- Story 4 : Yaoundé -->
+            <div class="story-circle-item" onclick="viewStory('Yaoundé', 'images/story-yaounde.jpg')">
+              <div class="story-avatar-wrapper">
+                <img src="images/story-yaounde.jpg" class="story-avatar-img" alt="Yaoundé">
+              </div>
+              <span class="story-name">Yaoundé</span>
+            </div>
+
+            <!-- Story 5 : Diane -->
+            <div class="story-circle-item" onclick="viewStory('Diane', 'images/story-diane.jpg')">
+              <div class="story-avatar-wrapper">
+                <img src="images/story-diane.jpg" class="story-avatar-img" alt="Diane">
+              </div>
+              <span class="story-name">Diane</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2. BLOC CRÉATION DE PUBLICATION ("Quoi de neuf ?") -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <div class="flex items-center gap-3">
+            <img src="images/avatar-jeanpierre.jpg" class="w-10 h-10 rounded-full object-cover">
+            <button 
+              onclick="openPostModal()"
+              class="flex-1 text-left px-4 py-2.5 bg-slate-100 hover:bg-slate-200/70 rounded-full text-slate-500 text-sm font-medium transition-colors"
+            >
+              Quoi de neuf ?
+            </button>
+          </div>
+          
+          <!-- 4 BOUTONS COLORÉS (Photo, Vidéo, En direct, Sondage) -->
+          <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-4 gap-1 text-xs">
+            <button onclick="openPostModal('photo')" class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold transition-colors">
+              <i class="fa-solid fa-camera text-red-500 text-sm"></i>
+              <span class="hidden sm:inline">Photo</span>
+            </button>
+            <button onclick="openPostModal('video')" class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold transition-colors">
+              <i class="fa-brands fa-youtube text-red-600 text-sm"></i>
+              <span class="hidden sm:inline">Vidéo</span>
+            </button>
+            <button onclick="showToast('En direct : caméra prête')" class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold transition-colors">
+              <i class="fa-solid fa-video text-pink-600 text-sm"></i>
+              <span class="hidden sm:inline">En direct</span>
+            </button>
+            <button onclick="openPollModal()" class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold transition-colors">
+              <i class="fa-solid fa-chart-simple text-emerald-600 text-sm"></i>
+              <span class="hidden sm:inline">Sondage</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. PUBLICATION OFFICIELLE DE LA MAQUETTE (AFRIBOOK Officiel) -->
+        <article class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+          
+          <!-- Entête du post -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <img src="images/logo-round.jpg" class="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h4 class="font-bold text-slate-900 text-sm">AFRIBOOK Officiel</h4>
+                  <i class="fa-solid fa-circle-check text-blue-600 text-xs" title="Compte officiel vérifié"></i>
+                </div>
+                <p class="text-xs text-slate-400 flex items-center gap-1">
+                  2 h • <i class="fa-solid fa-earth-americas text-[10px]"></i>
+                </p>
+              </div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 p-1">
+              <i class="fa-solid fa-ellipsis"></i>
+            </button>
+          </div>
+
+          <!-- Texte du post exact -->
+          <p class="text-slate-900 text-sm font-medium leading-relaxed">
+            Ensemble pour une Afrique plus forte, plus unie et plus connectée ! 💚💙🌍
+          </p>
+
+          <!-- Photo de Yaoundé avec la bannière AFRIBOOK officielle intégrée -->
+          <div class="post-media-container shadow">
+            <img src="images/post-yaounde.jpg" alt="Yaoundé Cameroun" class="w-full object-cover">
+            
+            <!-- Bannière incrustée en bas à gauche de la photo -->
+            <div class="post-media-banner">
+              <div class="post-media-banner-brand">AFRIBOOK</div>
+              <div class="post-media-banner-slogan">L'Afrique connectée au monde.</div>
+            </div>
+          </div>
+
+          <!-- Barre des compteurs de réactions (12,5 K, 842 commentaires, 1,2 K partages) -->
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div class="flex items-center gap-1">
+              <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px]">👍</span>
+              <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-600 text-white text-[10px]">❤️</span>
+              <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white text-[10px]">😮</span>
+              <span id="officialReactionsCount" class="font-bold text-slate-700 ml-1">12,5 K</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span>842 commentaires</span>
+              <span>•</span>
+              <span>1,2 K partages</span>
+            </div>
+          </div>
+
+          <!-- 3 Boutons d'action avec dock de réactions flottant -->
+          <div class="pt-2 border-t border-slate-100 grid grid-cols-3 gap-1 text-xs">
+            <div class="reactions-wrapper w-full" onmouseenter="showReactionDock('official')" onmouseleave="hideReactionDock('official')">
+              <div id="reactionDock-official" class="reactions-dock hidden">
+                <div class="reaction-btn" onclick="selectReaction('official', 'like')">👍<span class="tooltip">J'aime</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'love')">❤️<span class="tooltip">J'adore</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'support')">🤝<span class="tooltip">Solidarité</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'haha')">😂<span class="tooltip">Haha</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'wow')">😮<span class="tooltip">Wouah</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'sad')">😢<span class="tooltip">Triste</span></div>
+                <div class="reaction-btn" onclick="selectReaction('official', 'angry')">😡<span class="tooltip">Grrr</span></div>
+              </div>
+              <button 
+                id="likeBtnOfficial"
+                onclick="toggleOfficialLike()"
+                class="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl hover:bg-slate-100 text-slate-600 font-bold transition-all"
+              >
+                <i class="fa-regular fa-thumbs-up text-sm"></i>
+                <span id="officialLikeText">J'aime</span>
+              </button>
+            </div>
+            <button 
+              onclick="toggleOfficialComments()"
+              class="flex items-center justify-center gap-1.5 py-2 rounded-xl hover:bg-slate-100 text-slate-600 font-bold transition-colors"
+            >
+              <i class="fa-regular fa-comment text-sm"></i>
+              <span>Commenter</span>
+            </button>
+            <button 
+              onclick="handleSharePost()"
+              class="flex items-center justify-center gap-1.5 py-2 rounded-xl hover:bg-slate-100 text-slate-600 font-bold transition-colors"
+            >
+              <i class="fa-solid fa-share text-sm"></i>
+              <span>Partager</span>
+            </button>
+          </div>
+
+          <!-- Section commentaires officielle -->
+          <div id="officialCommentsBox" class="hidden pt-3 border-t border-slate-100 space-y-2.5 animate-slide-down">
+            <div class="flex items-center gap-2">
+              <img src="images/avatar-jeanpierre.jpg" class="w-8 h-8 rounded-full object-cover">
+              <input 
+                id="officialCommentInput" 
+                type="text" 
+                placeholder="Écrivez un commentaire en tant que Jean Pierre..." 
+                class="flex-1 px-3 py-1.5 bg-slate-100 rounded-full text-xs focus:bg-white border border-transparent focus:border-blue-600 focus:outline-none"
+                onkeypress="if(event.key === 'Enter') postOfficialComment()"
+              >
+              <button onclick="postOfficialComment()" class="px-3 py-1 bg-[#0047b3] text-white rounded-full text-xs font-bold">Envoyer</button>
+            </div>
+            <div id="officialCommentsList" class="space-y-2 text-xs">
+              <div class="bg-slate-50 p-2.5 rounded-xl">
+                <span class="font-bold text-slate-900">Marie</span> : Bravo pour cette formidable initiative pour notre cher continent ! 👏
+              </div>
+            </div>
+          </div>
+
+        </article>
+
+        <!-- Autres publications du fil -->
+        <div id="dynamicFeedList" class="space-y-4">
+          <!-- Injecté par JavaScript -->
+        </div>
+
+      </div>
+
+      <!-- CONTENU ONGLET 2 : GROUPES -->
+      <div id="viewGroupsSection" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Groupes & Communautés Africaines</h3>
+            <p class="text-xs text-slate-500">Échangez avec des créateurs et professionnels à travers l'Afrique.</p>
+          </div>
+          <button onclick="openCreateGroupModal()" class="px-4 py-2 bg-[#0047b3] hover:bg-[#003893] text-white font-bold text-xs rounded-xl shadow">
+            + Créer un groupe
+          </button>
+        </div>
+        <div id="groupsGridContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Rempli par JavaScript -->
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 3 : AMIS (128 AMIS) -->
+      <div id="viewFriendsSection" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-base">Amis & Connexions (128)</h3>
+            <span class="bg-blue-100 text-[#0047b3] font-bold text-xs px-2.5 py-1 rounded-full">5 demandes reçues</span>
+          </div>
+        </div>
+        <div id="friendsGridContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Rempli par JavaScript -->
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 4 : MESSAGERIE DIRECTE -->
+      <div id="viewMessagesSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[580px] flex flex-col sm:flex-row">
+        <!-- Liste des discussions -->
+        <div class="w-full sm:w-1/3 border-r border-slate-200 flex flex-col h-full bg-slate-50/50">
+          <div class="p-3 border-b border-slate-200 bg-white font-bold text-xs text-slate-800">
+            Discussions directes
+          </div>
+          <div id="chatsListContainer" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <!-- Liste dynamique -->
+          </div>
+        </div>
+        <!-- Fenêtre de chat -->
+        <div class="w-full sm:w-2/3 flex flex-col h-full bg-white">
+          <div id="chatTopBar" class="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-2.5">
+              <img id="chatActiveAvatar" src="images/story-marie.jpg" class="w-9 h-9 rounded-full object-cover">
+              <div>
+                <h4 id="chatActiveName" class="font-bold text-slate-900 text-xs">Marie</h4>
+                <p class="text-[10px] text-emerald-600 font-semibold">● En ligne</p>
+              </div>
+            </div>
+          </div>
+          <div id="chatMessagesBox" class="flex-1 p-4 overflow-y-auto space-y-2 bg-slate-50/30 text-xs">
+            <!-- Messages -->
+          </div>
+          <div id="chatRecordingBar" class="hidden px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between">
+            <div class="recording-badge">
+              <span class="recording-pulse-dot"></span>
+              <span>Enregistrement en cours... <strong id="recordingTimerDisplay">0:03</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="cancelVoiceRecording()" class="text-xs text-slate-500 hover:text-slate-700">Annuler</button>
+              <button onclick="stopAndSendVoiceRecording()" class="px-3 py-1 bg-red-600 text-white rounded-full text-xs font-bold">Envoyer vocal</button>
+            </div>
+          </div>
+          <form onsubmit="sendChatMessage(event)" class="p-3 border-t border-slate-200 flex items-center gap-2 bg-white">
+            <button type="button" onclick="startVoiceRecording()" title="Enregistrer une note vocale" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-microphone text-xs"></i>
+            </button>
+            <input 
+              id="chatTextInput" 
+              type="text" 
+              placeholder="Écrivez votre message..." 
+              class="flex-1 px-4 py-2 bg-slate-100 rounded-full text-xs focus:bg-white border border-transparent focus:border-blue-600 focus:outline-none"
+            >
+            <button type="submit" class="w-8 h-8 rounded-full bg-[#0047b3] text-white flex items-center justify-center hover:bg-[#003893]">
+              <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 5 : MENU (ÉCRAN DROIT DE LA MAQUETTE POUR MOBILE) -->
+      <div id="viewMenuSection" class="hidden space-y-3">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-[#0047b3] to-[#003380] p-4 text-white">
+            <div class="flex items-center gap-3">
+              <img src="images/avatar-jeanpierre.jpg" alt="Jean Pierre MANGA" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md">
+              <div class="overflow-hidden">
+                <h3 class="font-bold text-base leading-tight truncate">Jean Pierre MANGA</h3>
+                <p class="text-xs text-blue-200 truncate mb-1">@jeanpierremanga</p>
+                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#00d021] text-white text-[10px] font-bold shadow-sm">
+                  <i class="fa-solid fa-circle-check text-[10px]"></i> Compte vérifié
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-2 space-y-0.5">
+            <div onclick="switchMainTab('profile')" class="menu-item-row">
+              <div class="flex items-center gap-3">
+                <div class="menu-icon-box bg-blue-100 text-blue-700"><i class="fa-solid fa-user"></i></div>
+                <span>Mon profil</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+            <div onclick="switchMainTab('friends')" class="menu-item-row">
+              <div class="flex items-center gap-3">
+                <div class="menu-icon-box bg-blue-100 text-blue-700"><i class="fa-solid fa-user-group"></i></div>
+                <span>Amis</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="bg-red-600 text-white font-bold text-xs px-2 py-0.5 rounded-full">128</span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+              </div>
+            </div>
+            <div onclick="switchMainTab('groups')" class="menu-item-row">
+              <div class="flex items-center gap-3">
+                <div class="menu-icon-box bg-emerald-100 text-emerald-700"><i class="fa-solid fa-users"></i></div>
+                <span>Groupes</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+            <div onclick="switchMainTab('marketplace')" class="menu-item-row">
+              <div class="flex items-center gap-3">
+                <div class="menu-icon-box bg-blue-100 text-blue-700"><i class="fa-solid fa-store"></i></div>
+                <span>Marketplace</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+            <div onclick="switchMainTab('videos')" class="menu-item-row">
+              <div class="flex items-center gap-3">
+                <div class="menu-icon-box bg-purple-100 text-purple-700"><i class="fa-solid fa-play"></i></div>
+                <span>Vidéos</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+            <div class="pt-2 border-t border-slate-100 space-y-1">
+              <div class="menu-item-row">
+                <div class="flex items-center gap-3 text-slate-700">
+                  <i class="fa-solid fa-moon text-slate-500 w-5"></i>
+                  <span class="text-xs font-semibold">Mode sombre</span>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" onchange="toggleDarkMode(this.checked)">
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+              <div class="menu-item-row text-red-600 hover:bg-red-50" onclick="handleLogout()">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+                  <span class="text-xs font-bold">Déconnexion</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 bg-gradient-to-r from-[#003893] to-[#0047b3] text-white flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <img src="images/logo.jpg" class="w-8 h-8 rounded-lg object-cover">
+              <div>
+                <div class="font-black text-xs tracking-tight text-white flex items-center">
+                  AFRI<span class="text-[#00e626]">BOOK</span>
+                </div>
+                <div class="text-[10px] text-blue-200">Construisons ensemble une Afrique numérique !</div>
+              </div>
+            </div>
+            <div class="w-6 h-6 rounded-full bg-[#00d021] text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 6 : MARKETPLACE AFRIBOOK -->
+      <div id="viewMarketplaceSection" class="hidden space-y-4">
+        <div class="bg-gradient-to-r from-[#0047b3] to-emerald-700 rounded-2xl p-4 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-300">Commerce Panafricain</span>
+            <h3 class="font-bold text-lg leading-tight flex items-center gap-1.5">
+              <i class="fa-solid fa-store"></i> Marketplace AfriBook
+            </h3>
+            <p class="text-xs text-blue-100">Achetez et vendez en toute confiance au Cameroun, Sénégal, Côte d'Ivoire et partout en Afrique.</p>
+          </div>
+          <button onclick="openSellProductModal()" class="self-start sm:self-auto px-4 py-2 bg-[#00d021] hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md transition-transform active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Vendre un article
+          </button>
+        </div>
+
+        <!-- Filtres Catégories & Ville -->
+        <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 max-w-full">
+            <button onclick="filterMarketplace('all')" class="market-cat-btn active px-3 py-1.5 rounded-full font-bold bg-blue-100 text-[#0047b3]">Tout</button>
+            <button onclick="filterMarketplace('High-Tech')" class="market-cat-btn px-3 py-1.5 rounded-full font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">📱 High-Tech</button>
+            <button onclick="filterMarketplace('Mode & Wax')" class="market-cat-btn px-3 py-1.5 rounded-full font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">👗 Mode & Wax</button>
+            <button onclick="filterMarketplace('AgriBio')" class="market-cat-btn px-3 py-1.5 rounded-full font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">🌾 AgriBio</button>
+            <button onclick="filterMarketplace('Véhicules')" class="market-cat-btn px-3 py-1.5 rounded-full font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">🚗 Véhicules</button>
+          </div>
+          <select id="marketCityFilter" onchange="filterMarketplaceByCity(this.value)" class="px-2.5 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none">
+            <option value="all">🌍 Toutes les villes</option>
+            <option value="Yaoundé">Yaoundé (Cameroun)</option>
+            <option value="Douala">Douala (Cameroun)</option>
+            <option value="Dakar">Dakar (Sénégal)</option>
+            <option value="Abidjan">Abidjan (Côte d'Ivoire)</option>
+            <option value="Bamako">Bamako (Mali)</option>
+          </select>
+        </div>
+
+        <!-- Grille des produits -->
+        <div id="marketplaceProductsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Injecté par JavaScript -->
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 7 : AFRIREELS & VIDÉOS -->
+      <div id="viewVideosSection" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i class="fa-solid fa-circle-play text-red-600"></i> AfriReels & Vidéos
+            </h3>
+            <p class="text-xs text-slate-500">Les meilleures vidéos de créateurs et entrepreneurs africains.</p>
+          </div>
+          <button onclick="showToast('Publication de Reel prête')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow">
+            + Publier un Reel
+          </button>
+        </div>
+        <!-- Grille des Vidéos Reels -->
+        <div id="videosGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          <!-- Injecté par JavaScript -->
+        </div>
+      </div>
+
+      <!-- CONTENU ONGLET 8 : PROFIL COMPLET DE JEAN PIERRE MANGA -->
+      <div id="viewProfileSection" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="h-44 sm:h-52 bg-gradient-to-r from-[#003893] via-[#0047b3] to-emerald-600 relative">
+            <img src="images/post-yaounde.jpg" class="w-full h-full object-cover opacity-60">
+            <button onclick="showToast('Photo de couverture mise à jour')" class="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white text-xs px-3 py-1.5 rounded-xl font-semibold backdrop-blur flex items-center gap-1.5">
+              <i class="fa-solid fa-camera"></i> Changer la couverture
+            </button>
+          </div>
+          
+          <div class="px-6 pb-6 relative">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between -mt-16 sm:-mt-20 mb-4 gap-4">
+              <div class="relative inline-block self-start">
+                <img id="profPageAvatar" src="images/avatar-jeanpierre.jpg" class="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-xl">
+                <button onclick="showToast('Changer la photo de profil')" class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white border-2 border-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-camera"></i>
+                </button>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openEditProfileModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-pen"></i> Modifier le profil
+                </button>
+                <button onclick="openCreateStoryModal()" class="px-4 py-2 bg-[#0047b3] hover:bg-[#003893] text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus"></i> Ajouter à la story
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <h2 id="profHeaderName" class="text-xl sm:text-2xl font-black text-slate-900">Jean Pierre MANGA</h2>
+                <i class="fa-solid fa-circle-check text-blue-600 text-base" title="Compte officiel vérifié"></i>
+              </div>
+              <p id="profHeaderHandle" class="text-xs text-slate-500 font-medium">@jeanpierremanga • <span id="profHeaderCity">Yaoundé, Cameroun</span></p>
+              <p id="profHeaderBio" class="text-xs sm:text-sm text-slate-700 max-w-2xl pt-2 leading-relaxed">
+                Leader d'opinion & entrepreneur technologique panafricain. Ensemble pour une Afrique connectée ! 🇨🇲🌍
+              </p>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-6 text-xs text-slate-600 font-semibold">
+              <div><strong class="text-slate-900 font-bold text-sm">128</strong> Amis</div>
+              <div><strong class="text-slate-900 font-bold text-sm">42</strong> Publications</div>
+              <div><strong class="text-slate-900 font-bold text-sm">1,4 K</strong> Abonnés</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- COLONNE DROITE : CONTACTS EN LIGNE & TENDANCES AFRICAINES               -->
+    <!-- ======================================================================= -->
+    <aside class="hidden lg:block lg:col-span-3 space-y-4">
+      
+      <!-- Contacts en ligne -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between">
+          <span>Contacts connectés</span>
+          <i class="fa-solid fa-magnifying-glass text-xs cursor-pointer"></i>
+        </h4>
+        <div class="space-y-2 text-xs">
+          
+          <div onclick="openChatWith('Marie', 'images/story-marie.jpg')" class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+            <div class="relative">
+              <img src="images/story-marie.jpg" class="w-8 h-8 rounded-full object-cover">
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+            </div>
+            <span class="font-semibold text-slate-800">Marie</span>
+          </div>
+
+          <div onclick="openChatWith('Albert', 'images/story-albert.jpg')" class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+            <div class="relative">
+              <img src="images/story-albert.jpg" class="w-8 h-8 rounded-full object-cover">
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+            </div>
+            <span class="font-semibold text-slate-800">Albert</span>
+          </div>
+
+          <div onclick="openChatWith('Diane', 'images/story-diane.jpg')" class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+            <div class="relative">
+              <img src="images/story-diane.jpg" class="w-8 h-8 rounded-full object-cover">
+              <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+            </div>
+            <span class="font-semibold text-slate-800">Diane</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Événements & Actualités du Continent -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 mb-2">Tendances en Afrique</h4>
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <span class="text-[10px] text-slate-400">Cameroun • Yaoundé</span>
+            <p class="font-bold text-slate-800 hover:text-blue-600 cursor-pointer">#AfriqueConnectée</p>
+            <span class="text-[10px] text-slate-400">12,5 K partages</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Côte d'Ivoire • Abidjan</span>
+            <p class="font-bold text-slate-800 hover:text-blue-600 cursor-pointer">#TechSahel2026</p>
+            <span class="text-[10px] text-slate-400">8,2 K publications</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- BARRE DE NAVIGATION INFÉRIEURE MOBILE (POUR LES SMARTPHONES) -->
+  <!-- ========================================================================= -->
+  <footer class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around py-2 z-50 shadow-lg text-[11px] font-bold">
+    <button onclick="switchMainTab('feed')" id="m-tab-feed" class="flex flex-col items-center text-[#0047b3]">
+      <i class="fa-solid fa-house text-lg"></i>
+      <span>Accueil</span>
+    </button>
+    <button onclick="switchMainTab('friends')" id="m-tab-friends" class="flex flex-col items-center text-slate-500 relative">
+      <i class="fa-solid fa-user-group text-lg"></i>
+      <span>Amis</span>
+      <span class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">5</span>
+    </button>
+    <button onclick="switchMainTab('videos')" id="m-tab-videos" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-circle-play text-lg"></i>
+      <span>Vidéos</span>
+    </button>
+    <button onclick="switchMainTab('groups')" id="m-tab-groups" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-users text-lg"></i>
+      <span>Groupes</span>
+    </button>
+    <button onclick="switchMainTab('marketplace')" id="m-tab-marketplace" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-store text-lg"></i>
+      <span>Marketplace</span>
+    </button>
+    <button onclick="toggleMobileMenuDrawer()" id="m-tab-menu" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-bars text-lg"></i>
+      <span>Menu</span>
+    </button>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL NOUVELLE PUBLICATION (AVEC UPLOAD DE FICHIER LOCAL & APERÇU) -->
+  <!-- ========================================================================= -->
+  <div id="postModalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm">Créer une publication AfriBook</h3>
+        <button onclick="closePostModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="submitNewPost(event)" class="mt-4 space-y-3">
+        <div class="flex items-center gap-2 mb-2">
+          <img src="images/avatar-jeanpierre.jpg" class="w-9 h-9 rounded-full object-cover">
+          <div>
+            <h5 class="font-bold text-xs text-slate-800">Jean Pierre MANGA</h5>
+            <span class="text-[10px] text-slate-400">🌍 Public • L'Afrique connectée</span>
+          </div>
+        </div>
+        <textarea 
+          id="newPostTextarea"
+          rows="3" 
+          placeholder="Quoi de neuf, Jean Pierre ?" 
+          class="w-full p-3 bg-slate-50 rounded-xl text-xs focus:bg-white border border-slate-200 focus:outline-none focus:border-blue-600 resize-none"
+          required
+        ></textarea>
+        
+        <!-- Zone d'aperçu d'image importée -->
+        <div id="postImagePreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-slate-200 max-h-48">
+          <img id="postImagePreview" class="w-full h-48 object-cover">
+          <button type="button" onclick="clearPostImagePreview()" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Boutons d'ajout de médias -->
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-600">Ajouter à votre publication</span>
+          <div class="flex items-center gap-2">
+            <!-- Upload fichier local -->
+            <input type="file" id="postFileInput" accept="image/*" class="hidden" onchange="handlePostFileSelect(event)">
+            <button type="button" onclick="document.getElementById('postFileInput').click()" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm" title="Importer une photo depuis l'appareil">
+              <i class="fa-solid fa-images"></i>
+            </button>
+            <!-- Bouton URL -->
+            <button type="button" onclick="togglePostUrlInput()" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0047b3] flex items-center justify-center text-sm" title="Lien web image">
+              <i class="fa-solid fa-link"></i>
+            </button>
+            <!-- Bouton Économie Low-Data -->
+            <button type="button" onclick="toggleLowDataMode()" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center text-sm" title="Mode Low-Data">
+              <i class="fa-solid fa-bolt-lightning"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="postUrlInputBox" class="hidden">
+          <input 
+            id="newPostImageUrl" 
+            type="url" 
+            placeholder="Collez le lien de l'image (https://...)" 
+            class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600"
+            onchange="previewUrlImage(this.value)"
+          >
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closePostModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-[#0047b3] hover:bg-[#003893] text-white font-bold text-xs rounded-xl shadow">Publier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL STORY VIEWER (LECTEUR DE STORIES INTERACTIF COMPLET) -->
+  <!-- ========================================================================= -->
+  <div id="storyViewerModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 animate-slide-down">
+    <div class="max-w-md w-full h-[88vh] rounded-3xl relative overflow-hidden bg-slate-900 flex flex-col justify-between shadow-2xl border border-white/10">
+      
+      <!-- Barre de progression de la story -->
+      <div class="absolute top-3 left-3 right-3 flex items-center gap-1 z-20">
+        <div class="story-progress-bar"><div id="storyProgressBarFill" class="story-progress-fill"></div></div>
+      </div>
+
+      <!-- Entête de la story (Auteur, Ville, Fermer) -->
+      <div class="absolute top-6 left-3 right-3 flex items-center justify-between text-white z-20">
+        <div class="flex items-center gap-2.5">
+          <img id="storyViewerAvatar" src="images/story-marie.jpg" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-400">
+          <div>
+            <h4 id="storyViewerName" class="font-bold text-xs">Marie</h4>
+            <span id="storyViewerMeta" class="text-[10px] text-slate-300">Yaoundé • il y a 2h</span>
+          </div>
+        </div>
+        <button onclick="closeStoryViewer()" class="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Image centrale de la story -->
+      <div class="w-full h-full flex items-center justify-center overflow-hidden relative">
+        <img id="storyViewerImage" src="images/story-marie.jpg" class="w-full h-full object-cover">
+        <div class="absolute bottom-20 left-4 right-4 text-white text-center">
+          <p id="storyViewerCaption" class="bg-black/60 backdrop-blur-sm px-4 py-2 rounded-2xl text-xs font-semibold inline-block shadow">
+            Superbe après-midi à Yaoundé 🇨🇲✨
+          </p>
+        </div>
+      </div>
+
+      <!-- Pied de la story : Réactions rapides & Réponse directe -->
+      <div class="absolute bottom-3 left-3 right-3 flex items-center gap-2 z-20">
+        <input 
+          id="storyReplyInput" 
+          type="text" 
+          placeholder="Répondre en message direct..." 
+          class="flex-1 px-4 py-2 bg-white/20 text-white placeholder-slate-300 rounded-full text-xs border border-white/20 focus:outline-none focus:bg-white/30 backdrop-blur-sm"
+          onkeypress="if(event.key === 'Enter') sendStoryReply()"
+        >
+        <!-- Émojis réactions instantanées -->
+        <button onclick="reactToStory('❤️')" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-base backdrop-blur-sm transition-transform active:scale-125">❤️</button>
+        <button onclick="reactToStory('🔥')" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-base backdrop-blur-sm transition-transform active:scale-125">🔥</button>
+        <button onclick="reactToStory('👏')" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-base backdrop-blur-sm transition-transform active:scale-125">👏</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL CRÉER UNE STORY -->
+  <!-- ========================================================================= -->
+  <div id="createStoryModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm">Ajouter à votre Story AfriBook</h3>
+        <button onclick="closeCreateStoryModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="submitNewStory(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Votre légende / message</label>
+          <input id="storyCaptionInput" type="text" placeholder="Ex: Célébration de la réussite de nos entrepreneurs ! 🚀" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Photo de la story (Fichier ou URL)</label>
+          <input type="file" id="storyFileInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-blue-50 file:text-[#0047b3] file:font-semibold">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeCreateStoryModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-[#0047b3] hover:bg-[#003893] text-white font-bold text-xs rounded-xl shadow">Publier ma Story</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL VENDRE UN ARTICLE (MARKETPLACE) -->
+  <!-- ========================================================================= -->
+  <div id="sellProductModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-store text-[#0047b3]"></i> Vendre un article sur AfriBook
+        </h3>
+        <button onclick="closeSellProductModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="submitNewProduct(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Titre de l'annonce *</label>
+          <input id="prodTitleInput" type="text" placeholder="Ex: Sac de café Arabica Pur 5kg" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Prix (FCFA) *</label>
+            <input id="prodPriceInput" type="number" placeholder="25000" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Catégorie</label>
+            <select id="prodCategoryInput" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+              <option value="High-Tech">📱 High-Tech</option>
+              <option value="Mode & Wax">👗 Mode & Wax</option>
+              <option value="AgriBio">🌾 AgriBio</option>
+              <option value="Véhicules">🚗 Véhicules</option>
+              <option value="Divers">📦 Divers</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ville</label>
+            <input id="prodCityInput" type="text" value="Yaoundé" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Numéro WhatsApp</label>
+            <input id="prodWhatsappInput" type="text" value="+237699001122" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Lien d'image du produit</label>
+          <input id="prodImageInput" type="url" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeSellProductModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-[#00d021] hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">Mettre en vente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL MODIFIER LE PROFIL -->
+  <!-- ========================================================================= -->
+  <div id="editProfileModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm">Modifier vos informations</h3>
+        <button onclick="closeEditProfileModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="saveProfileChanges(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nom complet</label>
+          <input id="editModalName" type="text" value="Jean Pierre MANGA" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ville</label>
+            <input id="editModalCity" type="text" value="Yaoundé" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Pays</label>
+            <input id="editModalCountry" type="text" value="Cameroun" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Biographie</label>
+          <textarea id="editModalBio" rows="3" class="w-full p-3 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600 resize-none">Leader d'opinion & entrepreneur technologique panafricain. Ensemble pour une Afrique connectée ! 🇨🇲🌍</textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-[#0047b3] hover:bg-[#003893] text-white font-bold text-xs rounded-xl shadow">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL PARTAGER UNE PUBLICATION -->
+  <!-- ========================================================================= -->
+  <div id="shareModalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-share-nodes text-[#0047b3]"></i> Partager la publication
+        </h3>
+        <button onclick="closeShareModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="py-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+        <button onclick="shareToAfriBookFeed()" class="share-channel-btn">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0047b3] flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-repeat"></i>
+          </div>
+          <span>Sur mon fil</span>
+        </button>
+        <button onclick="shareToWhatsApp()" class="share-channel-btn">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <span>WhatsApp</span>
+        </button>
+        <button onclick="copyPostLink()" class="share-channel-btn">
+          <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <span>Copier le lien</span>
+        </button>
+        <button onclick="shareInMessenger()" class="share-channel-btn">
+          <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-comment-dots"></i>
+          </div>
+          <span>Message privé</span>
+        </button>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex justify-end">
+        <button onclick="closeShareModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL CRÉER UN SONDAGE COMMUNAUTAIRE -->
+  <!-- ========================================================================= -->
+  <div id="pollModalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl animate-slide-down">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-square-poll-vertical text-emerald-600"></i> Créer un sondage communautaire
+        </h3>
+        <button onclick="closePollModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="submitNewPoll(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Votre question *</label>
+          <input id="pollQuestionInput" type="text" placeholder="Ex: Quelle priorité pour le numérique en Afrique ?" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="space-y-2">
+          <label class="block text-[11px] font-semibold text-slate-600">Options du sondage</label>
+          <input id="pollOpt1Input" type="text" placeholder="Option 1 : Énergie Solaire & Décentralisée" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          <input id="pollOpt2Input" type="text" placeholder="Option 2 : Intelligence Artificielle & AgriTech" required class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+          <input id="pollOpt3Input" type="text" placeholder="Option 3 : FinTech & Paiements Mobiles" class="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs border border-slate-200 focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closePollModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-[#00d021] hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">Lancer le sondage</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DÉTAILS PRODUIT MARKETPLACE -->
+  <!-- ========================================================================= -->
+  <div id="productDetailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl animate-slide-down flex flex-col max-h-[90vh]">
+      <div class="relative h-64 bg-slate-900 flex-shrink-0">
+        <img id="detailProdImg" src="" class="w-full h-full object-cover">
+        <button onclick="closeProductDetailModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span id="detailProdPriceBadge" class="absolute bottom-3 left-3 bg-black/80 backdrop-blur text-white font-black text-sm px-3 py-1.5 rounded-full"></span>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-3 flex-1 text-xs">
+        <div class="flex items-center justify-between">
+          <span id="detailProdCategory" class="px-2.5 py-1 rounded-full bg-blue-50 text-[#0047b3] font-bold text-[10px] uppercase"></span>
+          <span id="detailProdCity" class="text-slate-500 font-semibold flex items-center gap-1"></span>
+        </div>
+        <h3 id="detailProdTitle" class="font-bold text-slate-900 text-base leading-tight"></h3>
+        <p id="detailProdDesc" class="text-slate-600 leading-relaxed"></p>
+        <div class="p-3 bg-slate-50 rounded-2xl flex items-center justify-between border border-slate-100">
+          <div class="flex items-center gap-2.5">
+            <img id="detailProdSellerAvatar" src="" class="w-10 h-10 rounded-full object-cover">
+            <div>
+              <h5 id="detailProdSellerName" class="font-bold text-slate-900 text-xs"></h5>
+              <span class="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                <i class="fa-solid fa-circle-check"></i> Vendeur vérifié AfriBook
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-2">
+        <button id="detailProdChatBtn" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-comment-dots"></i> Négocier
+        </button>
+        <button id="detailProdWhatsappBtn" class="py-2.5 bg-[#00d021] hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow">
+          <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Direct
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL LECTEUR AFRIREELS PLEIN ÉCRAN -->
+  <!-- ========================================================================= -->
+  <div id="reelViewerModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 animate-slide-down">
+    <div class="reel-player-box flex flex-col justify-between p-4 text-white relative">
+      <img id="reelPlayerBg" src="" class="absolute inset-0 w-full h-full object-cover opacity-80">
+      <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90"></div>
+      
+      <!-- Haut du lecteur Reel -->
+      <div class="relative z-10 flex items-center justify-between">
+        <span class="bg-red-600 font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> AfriReel En Direct
+        </span>
+        <button onclick="closeReelViewer()" class="w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Centre : Bouton Play/Pause animé -->
+      <div class="relative z-10 flex items-center justify-center cursor-pointer" onclick="toggleReelPlay()">
+        <div id="reelPlayCenterBtn" class="w-16 h-16 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white text-2xl shadow-2xl transition-transform active:scale-90">
+          <i class="fa-solid fa-play ml-1"></i>
+        </div>
+      </div>
+
+      <!-- Bas du lecteur : Créateur, Titre, Actions latérales -->
+      <div class="relative z-10 flex items-end justify-between gap-3">
+        <div class="space-y-2 flex-1">
+          <div class="flex items-center gap-2">
+            <img id="reelPlayerAvatar" src="" class="w-10 h-10 rounded-full object-cover border-2 border-white">
+            <div>
+              <h4 id="reelPlayerCreator" class="font-bold text-xs text-white"></h4>
+              <span class="text-[10px] text-emerald-400 font-semibold">● Créateur Certifié</span>
+            </div>
+            <button onclick="this.textContent = 'Suivi'; this.className = 'px-3 py-1 bg-white/20 text-white font-bold text-[10px] rounded-full border border-white/30';" class="ml-2 px-3 py-1 bg-[#0047b3] text-white font-bold text-[10px] rounded-full shadow">Suivre</button>
+          </div>
+          <p id="reelPlayerTitle" class="text-xs font-medium text-slate-100 leading-snug"></p>
+        </div>
+
+        <!-- Colonne d'actions droite du Reel -->
+        <div class="flex flex-col items-center gap-3">
+          <button onclick="reactToReel(this)" class="flex flex-col items-center gap-1 text-white">
+            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-base hover:scale-110 transition-transform">
+              <i class="fa-solid fa-heart text-white"></i>
+            </div>
+            <span id="reelLikesCount" class="text-[10px] font-bold">2.4K</span>
+          </button>
+          <button onclick="showToast('Section commentaires du Reel')" class="flex flex-col items-center gap-1 text-white">
+            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-base hover:scale-110 transition-transform">
+              <i class="fa-solid fa-comment-dots"></i>
+            </div>
+            <span class="text-[10px] font-bold">384</span>
+          </button>
+          <button onclick="handleSharePost()" class="flex flex-col items-center gap-1 text-white">
+            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-base hover:scale-110 transition-transform">
+              <i class="fa-solid fa-share"></i>
+            </div>
+            <span class="text-[10px] font-bold">Partager</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- BANNIÈRE D'INSTALLATION PWA MOBILE -->
+  <!-- ========================================================================= -->
+  <div id="pwaInstallBanner" class="hidden fixed bottom-16 md:bottom-4 left-4 right-4 max-w-md mx-auto bg-slate-900 text-white p-3.5 rounded-2xl shadow-2xl z-40 border border-white/10 flex items-center justify-between gap-3 animate-slide-down">
+    <div class="flex items-center gap-3">
+      <img src="images/logo.jpg" class="w-10 h-10 rounded-xl object-cover shadow border border-white/20">
+      <div>
+        <h5 class="font-bold text-xs text-white">Installer l'application AfriBook</h5>
+        <p class="text-[10px] text-slate-300">Ajoutez à votre écran d'accueil pour un accès instantané.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="dismissPwaBanner()" class="text-[11px] text-slate-400 hover:text-white px-2">Plus tard</button>
+      <button onclick="installPwaApp()" class="px-3 py-1.5 bg-[#00d021] text-white font-bold text-xs rounded-xl shadow">Installer</button>
+    </div>
+  </div>
+
+  <!-- Toast de notification -->
+  <div id="toastNotification" class="hidden fixed top-20 right-4 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastText">Action effectuée avec succès !</span>
+  </div>
+
+  <!-- Script applicatif -->
+  <script src="js/app.js"></script>
+</body>
+</html>
